@@ -2,8 +2,10 @@ import socket
 import sys
 from time import sleep
 
+# TODO: Refactor in to classes where needed
 
 # checks if brightness is outside the range of 0 - 100
+
 
 def brightness_out_of_bounds(brightness):
     if brightness < 0 or brightness > 100:
@@ -63,7 +65,7 @@ def send_command(socket_object, request_to_send):
 
 # noinspection PyBroadException
 def main():
-    total_commands = {('turnOnRequest', 1), ('turnOffRequest', 2), ('brightness', 3)}
+    total_commands = [('turnOnRequest', 1), ('turnOffRequest', 2), ('brightness', 3)]
     host = input("Enter server IP")
     port = 12345
     user_type = "master"
@@ -86,19 +88,30 @@ def main():
             continue
         print("Connected to" + host)
         controller.send(str.encode(user_type))
-        break
 
-    while True:
+        try:
 
-        for command in total_commands:
-            print("Command: {}, ID: {}".format(command[0], command[1]))
-        control_request = input("Select the ID of the command you wish to give. ")
-        if request_invalid(control_request):
-            print("The ID you entered is invalid. Please select an ID from the list provided")
-            continue
+            while True:
+                controlled_clients_list = controller.recv(65535)
+                for client in controlled_clients_list:
+                    print(client)
+                client_to_control = input("Please select the light you want to control")
+                if client_to_control not in controlled_clients_list:
+                    print("Light does not exist. Please select a valid lightname from the list")
+                    continue
 
-        formatted_request = formulate_request(control_request)
-        send_command(controller, formatted_request)
+                for command in total_commands:
+                    print("Command: {}, ID: {}".format(command[0], command[1]))
+                control_request = input("Select the ID of the command you wish to give. ")
+                if request_invalid(control_request):
+                    print("The ID you entered is invalid. Please select an ID from the list provided")
+                    continue
+
+                formatted_request = formulate_request(control_request)
+                send_command(controller, formatted_request)
+        except:
+            print("Lost connection to Host..")
+            break
 
 
 if __name__ == '__main__':
