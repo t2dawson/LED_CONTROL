@@ -1,6 +1,6 @@
 from ControllerClientClass import *
 
-# TODO: work on command line argument parsing to include background and debug types
+# TODO: work on command line argument parsing to include debug types
 
 
 def main():

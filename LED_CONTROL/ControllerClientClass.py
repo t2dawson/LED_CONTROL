@@ -11,9 +11,10 @@ class ControllerClient:
         self.controller = None
         self.brightness = 0
         self.request = 0
-        self.user_request = ""
+        self.user_request = None
         self.initiate_controller_socket()
         self.name = user_name
+        self.client_to_control = None
 
     def initiate_controller_socket(self):
 
@@ -22,7 +23,7 @@ class ControllerClient:
 
         except:
             print("Error creating socket")
-            print("Check your Network Connection and restart this program")
+            print("Please restart this program")
             sys.exit(1)
 
 # checks if brightness is outside the range of 0 - 100
@@ -61,13 +62,14 @@ class ControllerClient:
     def formulate_request(self, commands):
         if self.request == 3:
             self.get_brightness_from_user()
-            self.user_request = commands[2][0] + self.brightness
+            self.user_request = (commands[2][0] + '-' + self.brightness + '-')
 
         elif self.request == 2:
             self.user_request = commands[1][0]
 
         else:
             self.user_request = commands[0][0]
+        self.user_request += self.client_to_control
 
 # sends the user's request to the server
 
@@ -98,8 +100,8 @@ class ControllerClient:
                     controlled_clients_list = self.controller.recv(65535)
                     for client in controlled_clients_list:
                         print(client)
-                    client_to_control = input("Please select the light you want to control")
-                    if client_to_control not in controlled_clients_list:
+                    self.client_to_control = input("Please select the light you want to control")
+                    if self.client_to_control not in controlled_clients_list:
                         print("Light does not exist. Please select a valid lightname from the list")
                         continue
 
